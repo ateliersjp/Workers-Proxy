@@ -75,11 +75,16 @@ async function get_current_instance(env) {
 async function update_current_instance(env) {
     let response = await fetch('https://github.com/zedeus/nitter/wiki/Instances');
     let response_text = await response.text();
-    let instance_value, instance = response_text.match(instance_pattern);
+    let instances = [];
 
+  for (let instance of response_text.matchAll(instance_pattern)) {
     if (instance && instance[1]) {
-        instance_value = instance[1];
-        await env.NITTER_KV_NAMESPACE.put(instance_key, instance_value, {
+      instances.push(instance[1]);
+    }
+  }
+
+  let instance_value = instances[Math.floor(Math.random() * instances.length)];
+  await env.NITTER_KV_NAMESPACE.put(instance_key, instance_value, {
             expirationTtl: 3600,
         });
     }
